@@ -16,9 +16,7 @@ public class Patient {
 		this.hasVirus = hasVirus;
 	}
 
-	public Patient() {
-		// TODO Auto-generated constructor stub
-	}
+	
 	
 	
 }
