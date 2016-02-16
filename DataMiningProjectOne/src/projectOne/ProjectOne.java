@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectOne {
-
-	
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -123,7 +121,79 @@ public class ProjectOne {
 		System.out.println("Likelihood for weight > 170.0 given virus: " + heavyVirusLike);
 		System.out.println("Likelihood for weight <= 170.0 given virus: " + lightVirusLike);
 		
+		int predYactualY = 0;
+		int predYactualN = 0;
+		int predNactualN = 0;
+		int predNactualY = 0;	
+		
+		for(int i = 0; i < testArray.size(); i++){
+			Patient current = testArray.get(i);
+			double discrimVirus = virusPrior;
+			double discrimNotVirus = virusNotPrior;
+			
+			String result;
+			
+			if(current.gender.equals("male")){
+				discrimVirus = discrimVirus * maleVirusLike;
+				discrimNotVirus = discrimNotVirus * maleNotVirusLike;
+			}
+			else{
+				discrimVirus = discrimVirus * femaleVirusLike;
+				discrimNotVirus = discrimNotVirus * femaleNotVirusLike;
+			}
+			if(current.bloodType.contains("+")){
+				discrimVirus = discrimVirus * positiveVirusLike;
+				discrimNotVirus = discrimNotVirus * positiveNotVirusLike;
+			}
+			else{
+				discrimVirus = discrimVirus * negativeVirusLike;
+				discrimNotVirus = discrimNotVirus * negativeNotVirusLike;
+			}
+			if(Double.parseDouble(current.weight) > 170.0){
+				discrimVirus = discrimVirus * heavyVirusLike;
+				discrimNotVirus = discrimNotVirus * heavyNotVirusLike;
+			}
+			else{
+				discrimVirus = discrimVirus * lightVirusLike;
+				discrimNotVirus = discrimNotVirus * lightNotVirusLike;
+			}
+			
+			if(discrimVirus > discrimNotVirus){
+				result = "Y";
+			}
+			else{
+				result = "N";
+			}
+			
+			
+			
+			if(current.hasVirus.equals(result)){
+				if(current.hasVirus.equals("Y")){
+					predYactualY++;
+				}
+				else{
+					predNactualN++;
+				}
+			}
+			else if(current.hasVirus.equals("Y")){
+				predNactualY++;
+			}
+			else{
+				predYactualN++;
+			}
+			
+			
+			System.out.println(i + " " + current.hasVirus + " " + result);
+			
+			
+			
+			
+		}
+		System.out.println("\nConfusion Matrix");
+		System.out.println("	Y	N\nY	" + predYactualY + "	" + predNactualY +  "\n\nN	" + predYactualN + "	" + predNactualN);
 		
 	}
+	
+
 
 }
