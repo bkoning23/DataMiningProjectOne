@@ -13,6 +13,8 @@ public class ProjectOne {
 		List<Patient> trainArray = new ArrayList<Patient>();
 		List<Patient> testArray = new ArrayList<Patient>();		
 		
+		Model model = new Model();
+		
 		String line;
 		
 		try(BufferedReader br = new BufferedReader(new FileReader("proj1train.txt"))){
@@ -30,96 +32,60 @@ public class ProjectOne {
 				testArray.add(temp);
 			}
 		}
-		
-		double virusCount = 0;
-		double femaleVirusCount = 0;
-		double maleVirusCount = 0;
-		double femaleCount = 0;
-		double maleCount = 0;
-		double positiveCount = 0;
-		double positiveVirusCount = 0;
-		double heavyVirusCount = 0;
-		double heavyCount = 0;
-		
+
 		int total;
 		
 		for(total = 0; total < trainArray.size(); total++){
 			Patient current = trainArray.get(total);
 			if(current.hasVirus.equals("Y")){
-				virusCount++;
+				model.virusCount++;
 				if(current.gender.equals("female")){
-					femaleVirusCount++;
+					model.femaleVirusCount++;
 				}
 				if(current.gender.equals("male")){
-					maleVirusCount++;
+					model.maleVirusCount++;
 				}
 				if(current.bloodType.contains("+")){
-					positiveVirusCount++;
+					model.positiveVirusCount++;
 				}
 				if(Double.parseDouble(current.weight) > 170.0){
-					heavyVirusCount++;
+					model.heavyVirusCount++;
 				}	
 			}
 			if(current.gender.equals("female")){
-				femaleCount++;
+				model.femaleCount++;
 			}
 			if(current.bloodType.contains("+")){
-				positiveCount++;
+				model.positiveCount++;
 			}
 			if(Double.parseDouble(current.weight) > 170.0){
-				heavyCount++;
+				model.heavyCount++;
 			}
 			
 		}
+		model.total = total;
+		model.buildModel();
+				
+		System.out.println("Prior for virus: " + model.virusPrior);
+		System.out.println("Prior for not virus: " + model.virusNotPrior);
 		
-		double virusPrior = virusCount/total;
-		double virusNotPrior = 1.0 - virusPrior;
+		System.out.println("Likelihood for female given not virus: " + model.femaleNotVirusLike);
+		System.out.println("Likelihood for male given not virus: " + model.maleNotVirusLike);
 		
-		double femaleNotVirusCount = femaleCount - femaleVirusCount;
-		double femaleNotVirusLike = (femaleNotVirusCount/total)/(virusNotPrior);
-		double femaleVirusLike = (femaleVirusCount/total)/(virusPrior);
+		System.out.println("Likelihood for female given virus: " + model.femaleVirusLike);		
+		System.out.println("Likelihood for male given virus: " + model.maleVirusLike);
 		
-		maleCount = total - femaleCount;
+		System.out.println("Likelihood for blood positive given not virus: " + model.positiveNotVirusLike);
+		System.out.println("Likelihood for blood negative given not virus: " + model.negativeNotVirusLike);
 		
-		double maleNotVirusCount = maleCount - maleVirusCount;
-		double maleNotVirusLike = (maleNotVirusCount/total)/(virusNotPrior);
-		double maleVirusLike = (maleVirusCount/total)/(virusPrior);
+		System.out.println("Likelihood for blood positive given virus: " + model.positiveVirusLike);
+		System.out.println("Likelihood for blood negative given virus: " + model.negativeVirusLike);
 		
-		double positiveNotVirusCount = positiveCount - positiveVirusCount;
-		double positiveNotVirusLike = (positiveNotVirusCount/total)/(virusNotPrior);
-		double negativeNotVirusLike = 1 - positiveNotVirusLike;
+		System.out.println("Likelihood for weight > 170.0 given not virus: " + model.heavyNotVirusLike);
+		System.out.println("Likelihood for weight <= 170.0 given not virus: " + model.lightNotVirusLike);
 		
-		double positiveVirusLike = (positiveVirusCount/total)/(virusPrior);
-		double negativeVirusLike = 1 - positiveVirusLike;
-		
-		double heavyVirusLike = (heavyVirusCount/total)/(virusPrior);
-		double lightVirusLike = 1 - heavyVirusLike;
-		
-		double heavyNotVirusCount = heavyCount - heavyVirusCount;
-		double heavyNotVirusLike = (heavyNotVirusCount/total)/(virusNotPrior);
-		double lightNotVirusLike = 1 - heavyNotVirusLike;
-		
-		
-		System.out.println("Prior for virus: " + virusPrior);
-		System.out.println("Prior for not virus: " + virusNotPrior);
-		
-		System.out.println("Likelihood for female given not virus: " + femaleNotVirusLike);
-		System.out.println("Likelihood for male given not virus: " + maleNotVirusLike);
-		
-		System.out.println("Likelihood for female given virus: " + femaleVirusLike);		
-		System.out.println("Likelihood for male given virus: " + maleVirusLike);
-		
-		System.out.println("Likelihood for blood positive given not virus: " + positiveNotVirusLike);
-		System.out.println("Likelihood for blood negative given not virus: " + negativeNotVirusLike);
-		
-		System.out.println("Likelihood for blood positive given virus: " + positiveVirusLike);
-		System.out.println("Likelihood for blood negative given virus: " + negativeVirusLike);
-		
-		System.out.println("Likelihood for weight > 170.0 given not virus: " + heavyNotVirusLike);
-		System.out.println("Likelihood for weight <= 170.0 given not virus: " + lightNotVirusLike);
-		
-		System.out.println("Likelihood for weight > 170.0 given virus: " + heavyVirusLike);
-		System.out.println("Likelihood for weight <= 170.0 given virus: " + lightVirusLike);
+		System.out.println("Likelihood for weight > 170.0 given virus: " + model.heavyVirusLike);
+		System.out.println("Likelihood for weight <= 170.0 given virus: " + model.lightVirusLike);
 		
 		int predYactualY = 0;
 		int predYactualN = 0;
@@ -128,45 +94,9 @@ public class ProjectOne {
 		
 		for(int i = 0; i < testArray.size(); i++){
 			Patient current = testArray.get(i);
-			double discrimVirus = virusPrior;
-			double discrimNotVirus = virusNotPrior;
 			
-			String result;
-			
-			if(current.gender.equals("male")){
-				discrimVirus = discrimVirus * maleVirusLike;
-				discrimNotVirus = discrimNotVirus * maleNotVirusLike;
-			}
-			else{
-				discrimVirus = discrimVirus * femaleVirusLike;
-				discrimNotVirus = discrimNotVirus * femaleNotVirusLike;
-			}
-			if(current.bloodType.contains("+")){
-				discrimVirus = discrimVirus * positiveVirusLike;
-				discrimNotVirus = discrimNotVirus * positiveNotVirusLike;
-			}
-			else{
-				discrimVirus = discrimVirus * negativeVirusLike;
-				discrimNotVirus = discrimNotVirus * negativeNotVirusLike;
-			}
-			if(Double.parseDouble(current.weight) > 170.0){
-				discrimVirus = discrimVirus * heavyVirusLike;
-				discrimNotVirus = discrimNotVirus * heavyNotVirusLike;
-			}
-			else{
-				discrimVirus = discrimVirus * lightVirusLike;
-				discrimNotVirus = discrimNotVirus * lightNotVirusLike;
-			}
-			
-			if(discrimVirus > discrimNotVirus){
-				result = "Y";
-			}
-			else{
-				result = "N";
-			}
-			
-			
-			
+			String result = model.discriminator(current);			
+
 			if(current.hasVirus.equals(result)){
 				if(current.hasVirus.equals("Y")){
 					predYactualY++;
@@ -181,19 +111,12 @@ public class ProjectOne {
 			else{
 				predYactualN++;
 			}
-			
-			
+					
 			System.out.println(i + " " + current.hasVirus + " " + result);
-			
-			
-			
-			
 		}
-		System.out.println("\nConfusion Matrix");
-		System.out.println("	Y	N\nY	" + predYactualY + "	" + predNactualY +  "\n\nN	" + predYactualN + "	" + predNactualN);
 		
+		
+		System.out.println("\nConfusion Matrix");
+		System.out.println("	Y	N\nY	" + predYactualY + "	" + predNactualY +  "\n\nN	" + predYactualN + "	" + predNactualN);		
 	}
-	
-
-
 }
