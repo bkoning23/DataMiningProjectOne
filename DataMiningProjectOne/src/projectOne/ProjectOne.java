@@ -51,6 +51,10 @@ public class ProjectOne {
 				if(Double.parseDouble(current.weight) > 170.0){
 					model.heavyVirusCount++;
 				}	
+				model.increaseWeightTotal(Double.parseDouble(current.weight), "Y");
+			}
+			else{
+				model.increaseWeightTotal(Double.parseDouble(current.weight), "N");
 			}
 			if(current.gender.equals("female")){
 				model.femaleCount++;
@@ -61,6 +65,7 @@ public class ProjectOne {
 			if(Double.parseDouble(current.weight) > 170.0){
 				model.heavyCount++;
 			}
+			
 			
 		}
 		model.total = total;

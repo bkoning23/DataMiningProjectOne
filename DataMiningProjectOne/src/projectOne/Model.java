@@ -13,6 +13,9 @@ public class Model {
 	double heavyCount = 0;
 	double total = 0;
 	
+	double virusWeightTotal = 0;
+	double notVirusWeightTotal = 0;
+	
 	double virusPrior;
 	double femaleNotVirusCount;
 	double femaleNotVirusLike;
@@ -31,6 +34,9 @@ public class Model {
 	double heavyNotVirusCount;
 	double heavyNotVirusLike;
 	double lightNotVirusLike;
+	
+	double virusWeightMean;
+	double notVirusWeightMean;
 	
 	
 	public void buildModel(){
@@ -60,6 +66,10 @@ public class Model {
 		heavyNotVirusCount = heavyCount - heavyVirusCount;
 		heavyNotVirusLike = (heavyNotVirusCount/total)/(virusNotPrior);
 		lightNotVirusLike = 1 - heavyNotVirusLike;
+		
+		virusWeightMean = virusWeightTotal/virusCount;
+		notVirusWeightMean = notVirusWeightTotal/(total - virusCount);	
+		
 	}
 	
 	public String discriminator(Patient p){
@@ -99,5 +109,15 @@ public class Model {
 		}
 
 	}
+	
+	public void increaseWeightTotal(double weight, String virus){
+		if(virus.equals("Y")){
+			virusWeightTotal = virusWeightTotal + weight;
+		}
+		else{
+			notVirusWeightTotal = notVirusWeightTotal + weight;
+		}
+	}
+	
 
 }
