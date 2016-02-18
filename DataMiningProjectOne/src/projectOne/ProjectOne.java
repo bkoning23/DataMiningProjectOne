@@ -1,3 +1,10 @@
+/*
+ * Brendan Koning
+ * CIS 335
+ * Naive Bayes Classifier
+ * ProjectOne.java
+ */
+
 package projectOne;
 
 import java.io.BufferedReader;
@@ -12,7 +19,7 @@ public class ProjectOne {
 		
 		List<Patient> trainArray = new ArrayList<Patient>();
 		List<Patient> testArray = new ArrayList<Patient>();		
-		
+
 		Model model = new Model();
 		
 		String line;
@@ -52,9 +59,11 @@ public class ProjectOne {
 					model.heavyVirusCount++;
 				}	
 				model.increaseWeightTotal(Double.parseDouble(current.weight), "Y");
+				model.virusWeights.add(Double.parseDouble(current.weight));
 			}
 			else{
 				model.increaseWeightTotal(Double.parseDouble(current.weight), "N");
+				model.notVirusWeights.add(Double.parseDouble(current.weight));
 			}
 			if(current.gender.equals("female")){
 				model.femaleCount++;
@@ -86,11 +95,17 @@ public class ProjectOne {
 		System.out.println("Likelihood for blood positive given virus: " + model.positiveVirusLike);
 		System.out.println("Likelihood for blood negative given virus: " + model.negativeVirusLike);
 		
-		System.out.println("Likelihood for weight > 170.0 given not virus: " + model.heavyNotVirusLike);
+/*		System.out.println("Likelihood for weight > 170.0 given not virus: " + model.heavyNotVirusLike);
 		System.out.println("Likelihood for weight <= 170.0 given not virus: " + model.lightNotVirusLike);
 		
 		System.out.println("Likelihood for weight > 170.0 given virus: " + model.heavyVirusLike);
 		System.out.println("Likelihood for weight <= 170.0 given virus: " + model.lightVirusLike);
+*/		
+		System.out.println("Mean for weight given virus: " + model.virusWeightMean);
+		System.out.println("Mean for weight given not virus: " + model.notVirusWeightMean);
+		
+		System.out.println("Standard deviation for weight given virus: " + model.virusWeightSD);
+		System.out.println("Standard deviation for weight given not virus: " + model.notVirusWeightSD);
 		
 		int predYactualY = 0;
 		int predYactualN = 0;

@@ -1,4 +1,14 @@
+/*
+ * Brendan Koning
+ * CIS 335
+ * Naive Bayes Classifier
+ * Model.java
+ */
+
 package projectOne;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Model {
 
@@ -38,6 +48,12 @@ public class Model {
 	double virusWeightMean;
 	double notVirusWeightMean;
 	
+	List<Double> virusWeights = new ArrayList<Double>();
+	List<Double> notVirusWeights = new ArrayList<Double>();
+	
+	double virusWeightSD = 0;
+	double notVirusWeightSD  = 0;
+	
 	
 	public void buildModel(){
 		virusPrior = virusCount/total;
@@ -70,6 +86,25 @@ public class Model {
 		virusWeightMean = virusWeightTotal/virusCount;
 		notVirusWeightMean = notVirusWeightTotal/(total - virusCount);	
 		
+		
+		int i = 0;
+		double varianceTotal = 0;
+		for(i = 0; i < virusWeights.size(); i++){
+			double temp = virusWeights.get(i) - virusWeightMean;
+			temp = temp * temp;
+			varianceTotal = varianceTotal + temp;
+		}
+		virusWeightSD = Math.sqrt(varianceTotal/virusCount);
+		
+		varianceTotal = 0;
+		for(i = 0; i < notVirusWeights.size(); i++){
+			double temp = notVirusWeights.get(i) - notVirusWeightMean;
+			temp = temp * temp;
+			varianceTotal = varianceTotal + temp;
+		}
+		notVirusWeightSD = Math.sqrt(varianceTotal/(total-virusCount));
+		
+		
 	}
 	
 	public String discriminator(Patient p){
@@ -92,14 +127,12 @@ public class Model {
 			discrimVirus = discrimVirus * negativeVirusLike;
 			discrimNotVirus = discrimNotVirus * negativeNotVirusLike;
 		}
-		if(Double.parseDouble(p.weight) > 170.0){
-			discrimVirus = discrimVirus * heavyVirusLike;
-			discrimNotVirus = discrimNotVirus * heavyNotVirusLike;
-		}
-		else{
-			discrimVirus = discrimVirus * lightVirusLike;
-			discrimNotVirus = discrimNotVirus * lightNotVirusLike;
-		}
+
+		double virusWeightNormalEstimate = calculateNormalEstimate(Double.parseDouble(p.weight), virusWeightMean, virusWeightSD);
+		discrimVirus = discrimVirus * virusWeightNormalEstimate;
+		
+		double notVirusWeightNormalEstimate = calculateNormalEstimate(Double.parseDouble(p.weight), notVirusWeightMean, notVirusWeightSD);
+		discrimNotVirus = discrimNotVirus * notVirusWeightNormalEstimate;
 		
 		if(discrimVirus > discrimNotVirus){
 			return "Y";
@@ -117,6 +150,14 @@ public class Model {
 		else{
 			notVirusWeightTotal = notVirusWeightTotal + weight;
 		}
+	}
+	
+	private double calculateNormalEstimate(double weight, double mean, double standardDev){
+		double firstHalf = 1/(Math.sqrt(2* Math.PI * standardDev * standardDev));
+		double expon = (Math.pow((mean - weight), 2))/(2*Math.pow(standardDev, 2));
+		double secondHalf = Math.pow(Math.E, expon);
+		
+		return firstHalf * secondHalf;
 	}
 	
 
